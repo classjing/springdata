@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+    	http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/data/jpa
+        http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        ">
+	<!-- 开启注解扫描 -->
+	<context:component-scan base-package="cn.zj.springdata"/>
+	
+	
+	<!-- 1.配置数据源 -->
+	<bean name="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+		<property name="url" value="jdbc:mysql://localhost:3306/springdata"/>
+		<property name="username" value="root"/>
+		<property name="password" value="root"/>
+	</bean>
+	
+	<!-- 2.配置JPA实体管理工厂 -->
+	<bean name="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<!-- 配置数据源 -->
+		<property name="dataSource" ref="dataSource"/>
+		
+		<!-- 配置被管理的实体对象的包 -->
+		<property name="packagesToScan" value="cn.zj.springdata.pojo"/>
+		
+		<!-- 配置jpa的适配器
+			 springdata底层使用jpa ，jpa有很多实现框架。
+			 一般使用hibernate 适配器较多
+		 -->
+		 <property name="jpaVendorAdapter">
+		 	<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+		 </property>
+		 
+		 <!-- jpa其他属性配置配置
+		 	数据库方言，是否显示sql语句，是否格式化sql语句
+		  -->
+		 <property name="jpaProperties">
+		 	<props>
+				<!-- 配置数据库方言 -->
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5InnoDBDialect</prop>
+                <!-- 定义sql语句是否显示 -->
+              	<prop key="hibernate.show_sql">true</prop>
+              	<!-- 定义sql语句格式化 -->
+                <prop key="hibernate.format_sql">true</prop>
+			</props>
+		 </property>
+	
+	</bean>
+	
+	
+	<!-- 把jpa 整合到 springdata中
+		base-package :jpa 管理dao 包
+		entity-manager-factory-ref ：实体管理工厂对象
+		 -->
+	<jpa:repositories base-package="cn.zj.springdata.repository" entity-manager-factory-ref="entityManagerFactory"/>
+ 
+	 <!-- 配置事务代理 -->
+	 <bean name="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+	 	<!-- 注入数据源 -->
+	 	<property name="dataSource" ref="dataSource"/>
+	 </bean>
+	 
+	 
+	 <!-- 配置事务 -->
+	 <tx:annotation-driven transaction-manager="transactionManager"/>
+	
+</beans>
