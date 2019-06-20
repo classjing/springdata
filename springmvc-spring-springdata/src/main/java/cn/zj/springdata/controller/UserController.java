@@ -17,7 +17,6 @@ public class UserController {
 	
 	@RequestMapping("/login")
 	public String login(User user,Model m) {
-		System.out.println(user);
 		
 		User findUser = service.login(user);
 		//账号密码错误，登录失败
